@@ -75,6 +75,7 @@ const convertFile = (filepath,options) => {
 			mkdirp(options.cacheDir).catch(reject).then(()=>{
 				const cacheFile = path.resolve(path.join(options.cacheDir,hash))
 				fs.access(cacheFile, fs.constants.F_OK, (err) => {
+					console.log(err)
 					if (err !== null) {
 						console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
 						const result = optimize(data, options.svgo)
