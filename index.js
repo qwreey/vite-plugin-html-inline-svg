@@ -93,7 +93,7 @@ const processInlineImage = (html, options) => {
 		const filepath = path.resolve(src)
         console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
 
-		convertFile(filepath,optimised).then(optimised=>{
+		convertFile(filepath,options).then(optimised=>{
 			html = replaceImageWithSVG(html, image, optimised)
 			resolve(html)
 		}).catch(reject)
