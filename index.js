@@ -6,12 +6,21 @@ const parse5 = require('parse5')
 const lodash = require('lodash')
 const { optimize } = require('svgo')
 const { red, green, blue, cyan, bold } = require('kolorist')
+const { createHash } = require('crypto')
+
+// (patch)
+function getHash(text, length = 8) {
+	const h = createHash('sha256').update(text).digest('hex').substring(0, length)
+	if (length <= 64) return h
+	return h.padEnd(length, '_')
+}
 
 const plugin_name = 'html-inline-svg'
 const default_options = {
 	svgo: {
 		plugins: ['removeComments']
-	}
+	},
+	cacheDir: "./svg-cache"
 }
 
 const isNodeValidInlineImage = node => {
@@ -44,6 +53,32 @@ const getInlineImages = (fragment, buffer) => {
 	return buffer
 }
 
+const convertFile = (filepath,options) => {
+	return new Promise((resolve, reject) => {
+		fs.readFile(filepath, 'utf8', (err, data) => {
+			if (err) return reject(err)
+			const hash = getHash(data)
+			const cacheFile = path.join(options.cacheDir,hash)
+			fs.access(cacheFile, fs.constants.F_OK, (err) => {
+				if (err) {
+					console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
+					const result = optimize(data, options.svgo)
+					const optimised = result.data
+					fs.writeFile(cacheFile,optimised,(err)=>{
+						if (err) reject(err)
+						resolve(optimised)
+					})
+				} else {
+					fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
+						if (err) reject(err)
+						resolve(cacheData)
+					})
+				}
+			})
+		})
+	})
+}
+
 const processInlineImage = (html, options) => {
 	
 	const fragment = parse5.parseFragment(html, {
@@ -58,15 +93,10 @@ const processInlineImage = (html, options) => {
 		const filepath = path.resolve(src)
         console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
 
-		fs.readFile(filepath, 'utf8', (err, data) => {
-			if (err) return reject(err)
-			
-			const result = optimize(data, options.svgo)
-			const optimised = result.data
+		convertFile(filepath,optimised).then(optimised=>{
 			html = replaceImageWithSVG(html, image, optimised)
-	  
 			resolve(html)
-		})
+		}).catch(reject)
 	})
 }
 
