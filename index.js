@@ -75,6 +75,7 @@ const convertFile = (filepath,options) => {
 			mkdirp(options.cacheDir).catch(reject).then(()=>{
 				const cacheFile = path.resolve(path.join(options.cacheDir,hash))
 				fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
+					console.log(!err)
 					if (!err) {
 						resolve(cacheData)
 						return
