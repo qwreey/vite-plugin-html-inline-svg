@@ -74,20 +74,21 @@ const convertFile = (filepath,options) => {
 			const hash = getHash(data)
 			mkdirp(options.cacheDir).catch(reject).then(()=>{
 				const cacheFile = path.resolve(path.join(options.cacheDir,hash))
-				fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
-					console.log(!err)
-					if (!err) {
-						resolve(cacheData)
-						return
+				fs.access(cacheFile,fs.constants.F_OK,(err)=>{
+					if (err) {
+						console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
+						const result = optimize(data, options.svgo)
+						const optimised = result.data
+						fs.writeFile(cacheFile,optimised,(err)=>{
+							if (err) reject(err)
+							resolve(optimised)
+						})
+					} else {
+						fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
+							if (err) reject(err)
+							resolve(cacheData)
+						})
 					}
-
-					console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
-					const result = optimize(data, options.svgo)
-					const optimised = result.data
-					fs.writeFile(cacheFile,optimised,(err)=>{
-						if (err) reject(err)
-						resolve(optimised)
-					})
 				})
 			})
 		})
@@ -106,7 +107,6 @@ const processInlineImage = (html, options) => {
 	return new Promise((resolve, reject) => {
 		const src = getImagesSrc(image)
 		const filepath = path.resolve(path.join(options.root,src))
-        console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
 
 		convertFile(filepath,options).then(optimised=>{
 			html = replaceImageWithSVG(html, image, optimised)
