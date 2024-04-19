@@ -30,7 +30,7 @@ const isNodeValidInlineImage = node => {
 }
 
 const getImagesSrc = node => {
-	const src = lodash.find(node.attrs, { name: 'src' })
+	const src = lodash.find(node.attrs, { name: 'svg-inline' })
 	if (!src) return ''
 
 	const value = src.value
