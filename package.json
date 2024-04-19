@@ -21,7 +21,7 @@
     "url": "https://github.com/im4LF/vite-plugin-html-inline-svg/issues"
   },
   "homepage": "https://github.com/im4LF/vite-plugin-html-inline-svg#readme",
-  "devDependencies": {
+  "dependencies": {
     "kolorist": "^1.5.1",
     "lodash": "^4.17.21",
     "parse5": "^7.0.0",
