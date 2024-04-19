@@ -69,7 +69,6 @@ const mkdirp = (path)=>{
 
 const convertFile = (filepath,options) => {
 	return new Promise((resolve, reject) => {
-		console.log(filepath)
 		fs.readFile(filepath, 'utf8', (err, data) => {
 			if (err) return reject(err)
 			const hash = getHash(data)
@@ -112,7 +111,10 @@ const processInlineImage = (html, options) => {
 		convertFile(filepath,options).then(optimised=>{
 			html = replaceImageWithSVG(html, image, optimised)
 			resolve(html)
-		}).catch(reject)
+		}).catch(reject).catch((err)=>{
+			console.error(`${bold(red('Error'))}: ${cyan(plugin_name)} (${filepath})`, err)
+			reject(err)
+		})
 	})
 }
 
