@@ -20,7 +20,8 @@ const default_options = {
 	svgo: {
 		plugins: ['removeComments']
 	},
-	cacheDir: "./svg-cache"
+	cacheDir: "./svg-cache",
+	root: "./src",
 }
 
 const isNodeValidInlineImage = node => {
@@ -58,7 +59,7 @@ const convertFile = (filepath,options) => {
 		fs.readFile(filepath, 'utf8', (err, data) => {
 			if (err) return reject(err)
 			const hash = getHash(data)
-			const cacheFile = path.join(options.cacheDir,hash)
+			const cacheFile = path.resolve(path.join(options.cacheDir,hash))
 			fs.access(cacheFile, fs.constants.F_OK, (err) => {
 				if (err) {
 					console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
@@ -90,7 +91,7 @@ const processInlineImage = (html, options) => {
 
 	return new Promise((resolve, reject) => {
 		const src = getImagesSrc(image)
-		const filepath = path.resolve(src)
+		const filepath = path.resolve(path.join(options.root,src))
         console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
 
 		convertFile(filepath,options).then(optimised=>{
