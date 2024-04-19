@@ -75,18 +75,18 @@ const convertFile = (filepath,options) => {
 			mkdirp(options.cacheDir).catch(reject).then(()=>{
 				const cacheFile = path.resolve(path.join(options.cacheDir,hash))
 				fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
-					console.log(cacheFile,fs.existsSync(cacheFile),cacheData)
-					if (cacheData) {
+					if (!err) {
 						resolve(cacheData)
-					} else {
-						console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
-						const result = optimize(data, options.svgo)
-						const optimised = result.data
-						fs.writeFile(cacheFile,optimised,(err)=>{
-							if (err) reject(err)
-							resolve(optimised)
-						})
+						return
 					}
+
+					console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
+					const result = optimize(data, options.svgo)
+					const optimised = result.data
+					fs.writeFile(cacheFile,optimised,(err)=>{
+						if (err) reject(err)
+						resolve(optimised)
+					})
 				})
 			})
 		})
