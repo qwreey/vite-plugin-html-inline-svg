@@ -105,9 +105,9 @@ const processInlineImage = (html, options) => {
 	if (!image) return Promise.resolve(html)
 
 	return new Promise((resolve, reject) => {
-		console.info(src)
 		const src = getImagesSrc(image)
 		const filepath = path.resolve(path.join(options.root,src))
+		console.info(src)
 
 		convertFile(filepath,options).then(optimised=>{
 			html = replaceImageWithSVG(html, image, optimised)
