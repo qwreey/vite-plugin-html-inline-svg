@@ -75,19 +75,18 @@ const convertFile = (filepath,options) => {
 			mkdirp(options.cacheDir).catch(reject).then(()=>{
 				const cacheFile = path.resolve(path.join(options.cacheDir,hash))
 				fs.access(cacheFile, fs.constants.F_OK, (err) => {
-					console.log(err)
-					if (err !== null) {
+					if (err === null) {
+						fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
+							if (err) reject(err)
+							resolve(cacheData)
+						})
+					} else {
 						console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
 						const result = optimize(data, options.svgo)
 						const optimised = result.data
 						fs.writeFile(cacheFile,optimised,(err)=>{
 							if (err) reject(err)
 							resolve(optimised)
-						})
-					} else {
-						fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
-							if (err) reject(err)
-							resolve(cacheData)
 						})
 					}
 				})
