@@ -26,7 +26,7 @@ const default_options = {
 
 const isNodeValidInlineImage = node => {
 	if (node.nodeName !== 'img') return false
-	return lodash.filter(node.attrs, { name: 'inline' }).length
+	return lodash.filter(node.attrs, { name: 'svg-inline' }).length
 }
 
 const getImagesSrc = node => {
@@ -107,7 +107,6 @@ const processInlineImage = (html, options) => {
 	return new Promise((resolve, reject) => {
 		const src = getImagesSrc(image)
 		const filepath = path.resolve(path.join(options.root,src))
-		console.info(src)
 
 		convertFile(filepath,options).then(optimised=>{
 			html = replaceImageWithSVG(html, image, optimised)
