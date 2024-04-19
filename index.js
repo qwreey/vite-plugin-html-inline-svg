@@ -68,6 +68,7 @@ const mkdirp = (path)=>{
 }
 
 const convertFile = (filepath,options) => {
+	console.info(filepath)
 	return new Promise((resolve, reject) => {
 		fs.readFile(filepath, 'utf8', (err, data) => {
 			if (err) return reject(err)
