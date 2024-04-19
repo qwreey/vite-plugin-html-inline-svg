@@ -54,34 +54,49 @@ const getInlineImages = (fragment, buffer) => {
 	return buffer
 }
 
+const mkdirp = (path)=>{
+	return new Promise((resolve, reject) => {
+		fs.access(path, fs.constants.F_OK, (err)=>{
+			if (err) {
+				fs.mkdir(path, { recursive: true }, (err)=>{
+					if (err) reject(err)
+					resolve()
+				})
+			} else resolve()
+		})
+	})
+}
+
 const convertFile = (filepath,options) => {
 	return new Promise((resolve, reject) => {
 		fs.readFile(filepath, 'utf8', (err, data) => {
 			if (err) return reject(err)
 			const hash = getHash(data)
-			const cacheFile = path.resolve(path.join(options.cacheDir,hash))
-			fs.access(cacheFile, fs.constants.F_OK, (err) => {
-				if (err) {
-					console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
-					const result = optimize(data, options.svgo)
-					const optimised = result.data
-					fs.writeFile(cacheFile,optimised,(err)=>{
-						if (err) reject(err)
-						resolve(optimised)
-					})
-				} else {
-					fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
-						if (err) reject(err)
-						resolve(cacheData)
-					})
-				}
+			mkdirp(options.cacheDir).catch(reject).then(()=>{
+				const cacheFile = path.resolve(path.join(options.cacheDir,hash))
+				fs.access(cacheFile, fs.constants.F_OK, (err) => {
+					if (err) {
+						console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
+						const result = optimize(data, options.svgo)
+						const optimised = result.data
+						fs.writeFile(cacheFile,optimised,(err)=>{
+							if (err) reject(err)
+							resolve(optimised)
+						})
+					} else {
+						fs.readFile(cacheFile,'utf-8', (err,cacheData)=>{
+							if (err) reject(err)
+							resolve(cacheData)
+						})
+					}
+				})
 			})
 		})
 	})
 }
 
 const processInlineImage = (html, options) => {
-	
+
 	const fragment = parse5.parseFragment(html, {
 		sourceCodeLocationInfo: true,
 	})
@@ -133,8 +148,8 @@ const htmlInlineSvg = options => {
 
 			console.info(`\n${cyan(plugin_name)}\tinline images: ${images.length}`)
 
-			return images.reduce((promise, imageNode) => 
-				promise.then(html => 
+			return images.reduce((promise, imageNode) =>
+				promise.then(html =>
 					processInlineImage(html, _options)
 				)
 				.catch(err => console.error(`${bold(red('Error'))}: ${cyan(plugin_name)}`, err))
