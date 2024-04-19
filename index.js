@@ -76,6 +76,7 @@ const convertFile = (filepath,options) => {
 				const cacheFile = path.resolve(path.join(options.cacheDir,hash))
 				fs.access(cacheFile, fs.constants.F_OK, (err) => {
 					if (err) {
+						console.error(err)
 						console.info(`${cyan(plugin_name)}\tprocess: ${filepath}`)
 						const result = optimize(data, options.svgo)
 						const optimised = result.data
@@ -145,8 +146,6 @@ const htmlInlineSvg = options => {
                 sourceCodeLocationInfo: true
             })
 			const images = getInlineImages(fragment)
-
-			console.info(`\n${cyan(plugin_name)}\tinline images: ${images.length}`)
 
 			return images.reduce((promise, imageNode) =>
 				promise.then(html =>
