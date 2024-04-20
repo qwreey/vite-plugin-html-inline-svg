@@ -41,7 +41,7 @@ const getInlineImages = (fragment, buffer) => {
 	if (!buffer) buffer = []
 
 	if ((fragment.childNodes && fragment.childNodes.length) || fragment.content) {
-		(fragment.childNodes || fragment.content).forEach((childNode) => {
+		(fragment.content || fragment.childNodes).forEach((childNode) => {
 			if (isNodeValidInlineImage(childNode)) {
 				buffer.push(childNode)
 			} 
